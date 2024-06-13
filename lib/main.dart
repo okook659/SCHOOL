@@ -1,3 +1,4 @@
+import 'package:expenses_tracker/app_view.dart';
 import 'package:expenses_tracker/pages/auth_page.dart';
 import 'package:expenses_tracker/pages/login_page.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AuthPage(),
+      //change this later
+     // home: AuthPage(),
+     home: MyAppView(),
     );
   }
 }
