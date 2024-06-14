@@ -16,6 +16,7 @@ class ExpenseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      tileColor: const Color.fromARGB(255, 228, 216, 196),
       title: Text(name),
       subtitle: Text(dateTime.day.toString() +
           ' / ' +

@@ -8,10 +8,29 @@ class ExpenseData extends ChangeNotifier {
   // list of all expenses
   List<ExpenseItem> overalExpenseList = [];
 
-  // get expense list
-  List<ExpenseItem> getAllExpenseList() {
-    return overalExpenseList;
+
+  // // get expense list
+  // List<ExpenseItem> getAllExpenseList() {
+  //   return overalExpenseList;
+  // }
+
+  Future<void> getAllExpenseList() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('expenses').get();
+      overalExpenseList = querySnapshot.docs.map((doc) {
+        return ExpenseItem(
+          // id: doc.id,  // Vous n'avez pas besoin d'ID ici
+          name: doc['name'],
+          amount: doc['amount'],
+          dateTime: (doc['dateTime'] as Timestamp).toDate(),
+        );
+      }).toList();
+      notifyListeners();
+    } catch (e) {
+      print("Failed to get expenses: $e");
+    }
   }
+
 
   // add a new expense
   void addNewExpense(ExpenseItem newExpense) {

@@ -125,13 +125,19 @@ class _HomePageState extends State<HomePage> {
     return Consumer<ExpenseData>(
       builder: (context, value, child) => Scaffold(
         appBar: AppBar(
+          backgroundColor: Colors.grey[400],
+          centerTitle: true,
+          title: Text(
+            "Logged in as: " + user.email!,
+            style: const TextStyle(fontSize: 20),
+          ),
           actions: [
             IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
           ],
         ),
-        backgroundColor: Colors.grey[300],
+        backgroundColor: Colors.grey[700],
         floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.black,
+          backgroundColor: const Color.fromARGB(255, 228, 216, 196),
           onPressed: addNewExpense,
           child: Icon(Icons.add),
         ),
@@ -147,6 +153,9 @@ class _HomePageState extends State<HomePage> {
 
             ListView(
           children: [
+            const SizedBox(
+              height: 30,
+            ),
 // weekly summary
             ExpenseSummary(startOfWeek: value.startOfWeekDate()),
 
@@ -156,14 +165,29 @@ class _HomePageState extends State<HomePage> {
 
 //expense list
 
+            // ListView.builder(
+            //     shrinkWrap: true,
+            //     physics: const NeverScrollableScrollPhysics(),
+            //     itemCount: value.getAllExpenseList().length,
+            //     itemBuilder: (context, index) => ExpenseTile(
+            //         name: value.getAllExpenseList()[index].name,
+            //         amount: value.getAllExpenseList()[index].amount,
+            //         dateTime: value.getAllExpenseList()[index].dateTime)),
+
+            // expense list
             ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: value.getAllExpenseList().length,
-                itemBuilder: (context, index) => ExpenseTile(
-                    name: value.getAllExpenseList()[index].name,
-                    amount: value.getAllExpenseList()[index].amount,
-                    dateTime: value.getAllExpenseList()[index].dateTime)),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: value.overalExpenseList.length,
+              itemBuilder: (context, index) {
+                var expense = value.overalExpenseList[index];
+                return ExpenseTile(
+                  name: expense.name,
+                  amount: expense.amount,
+                  dateTime: expense.dateTime,
+                );
+              },
+            ),
           ],
         ),
       ),
