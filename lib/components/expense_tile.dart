@@ -1,10 +1,13 @@
+import 'package:expenses_tracker/data/expense_data.dart';
+import 'package:expenses_tracker/models/expense_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ExpenseTile extends StatelessWidget {
   final String name;
   final String amount;
   final DateTime dateTime;
-  const ExpenseTile(
+  ExpenseTile(
       {super.key,
       required this.name,
       required this.amount,
@@ -19,7 +22,14 @@ class ExpenseTile extends StatelessWidget {
           dateTime.month.toString() +
           ' / ' +
           dateTime.year.toString()),
-      trailing: Text('\$' + amount),
+      leading: Text('\$' + amount),
+      trailing: IconButton(
+        icon: Icon(Icons.delete),
+        onPressed: () {
+          Provider.of<ExpenseData>(context, listen: false)
+              .deleteAnExpense(name);
+        },
+      ),
     );
   }
 }

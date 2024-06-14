@@ -16,8 +16,8 @@ class ExpenseData extends ChangeNotifier {
   // add a new expense
   void addNewExpense(ExpenseItem newExpense) {
     overalExpenseList.add(newExpense);
-
     addExpense(newExpense.amount, newExpense.name, newExpense.dateTime);
+
     notifyListeners();
   }
 
@@ -48,32 +48,23 @@ class ExpenseData extends ChangeNotifier {
   }
 
   // delete a new expense
-  // void deleteExpense(ExpenseItem expense) {
-  //   overalExpenseList.remove(expense);
-  //   deleteAnExpense(expense);
-  //   notifyListeners();
-  // }
-
-  Future<void> deleteAnExpense(String name) async {
-    CollectionReference expenses =
-        FirebaseFirestore.instance.collection('expenses');
-
-    QuerySnapshot querySnapshot =
-        await expenses.where('name', isEqualTo: name).get();
-
-    for (var doc in querySnapshot.docs) {
-      await doc.reference.delete();
-    }
-
-    for (var expense in overalExpenseList) {
-      if (expense.name == name) {
-        overalExpenseList.remove(expense);
-        notifyListeners();
-        break;
-      }
-    }
+  void deleteAnExpense(ExpenseItem expense) {
+    overalExpenseList.remove(expense);
 
     notifyListeners();
+  }
+
+  // delete expense
+  Future<void> deleteExpense(String documentId) async {
+    CollectionReference expenses =
+        FirebaseFirestore.instance.collection('expenses');
+    
+
+    return expenses
+        .doc(documentId)
+        .delete()
+        .then((value) => print("Expense Deleted"))
+        .catchError((error) => print("Failed to delete expense: $error"));
   }
 
   // get weekday from a dateTime object

@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // final user = FirebaseAuth.instance.currentUser!;
+  final user = FirebaseAuth.instance.currentUser!;
 
 // text controllers
   final newExpenseNameController = TextEditingController();
@@ -90,6 +90,7 @@ class _HomePageState extends State<HomePage> {
 
     // create this expense item
     ExpenseItem newExpense = ExpenseItem(
+        // userId: user.uid,
         name: newExpenseNameController.text,
         amount: amount,
         dateTime: DateTime.now());
@@ -123,9 +124,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
       builder: (context, value, child) => Scaffold(
-        // appBar: AppBar(
-        //   actions: [IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))],
-        // ),
+        appBar: AppBar(
+          actions: [
+            IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
+          ],
+        ),
         backgroundColor: Colors.grey[300],
         floatingActionButton: FloatingActionButton(
           backgroundColor: Colors.black,
@@ -152,6 +155,7 @@ class _HomePageState extends State<HomePage> {
             ),
 
 //expense list
+
             ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
