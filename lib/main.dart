@@ -1,8 +1,11 @@
 import 'package:expenses_tracker/app_view.dart';
+import 'package:expenses_tracker/data/expense_data.dart';
 import 'package:expenses_tracker/pages/auth_page.dart';
+import 'package:expenses_tracker/pages/home_page.dart';
 import 'package:expenses_tracker/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,11 +25,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ChangeNotifierProvider(create: (context) => ExpenseData(),
+    builder: (context, child) => MaterialApp(
       debugShowCheckedModeBanner: false,
       //change this later
-     // home: AuthPage(),
-     home: MyAppView(),
-    );
+     home: AuthPage(),
+    //  home: HomePage(),
+    ));
   }
 }
