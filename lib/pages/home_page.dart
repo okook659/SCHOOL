@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/components/expense_summary.dart';
 import 'package:expenses_tracker/components/expense_tile.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
@@ -12,6 +13,7 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomePageState();
+  
 }
 
 class _HomePageState extends State<HomePage> {
@@ -19,8 +21,7 @@ class _HomePageState extends State<HomePage> {
 
 // text controllers
   final newExpenseNameController = TextEditingController();
-  final newExpenseDollarController = TextEditingController();
-  final newExpenseCentsController = TextEditingController();
+  final newExpenseAmountController = TextEditingController();
 
   void addNewExpense() {
     showDialog(
@@ -41,24 +42,13 @@ class _HomePageState extends State<HomePage> {
                   // expense amount
                   Row(
                     children: [
-                      //dollars
+                      //francs
                       Expanded(
                         child: TextField(
-                          controller: newExpenseDollarController,
+                          controller: newExpenseAmountController,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                            hintText: "Dollars",
-                          ),
-                        ),
-                      ),
-
-                      //cents
-                      Expanded(
-                        child: TextField(
-                          controller: newExpenseCentsController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            hintText: "Cents",
+                            hintText: "Francs CFA",
                           ),
                         ),
                       ),
@@ -83,20 +73,23 @@ class _HomePageState extends State<HomePage> {
   }
 
 // save
-  void save() {
+  void save() async {
 // put dollar and cents together
-    String amount =
-        newExpenseDollarController.text + '.' + newExpenseCentsController.text;
+    String amount = newExpenseAmountController.text;
 
     // create this expense item
-    ExpenseItem newExpense = ExpenseItem(
-        // userId: user.uid,
-        name: newExpenseNameController.text,
-        amount: amount,
-        dateTime: DateTime.now());
+    // ExpenseItem newExpense = ExpenseItem(
+    //     // userId: user.uid,
+    //     name: newExpenseNameController.text,
+    //     amount: amount,
+    //     dateTime: DateTime.now());
 
     //add the new expense
-    Provider.of<ExpenseData>(context, listen: false).addNewExpense(newExpense);
+    Provider.of<ExpenseData>(context, listen: false).addExpense(
+      amount,
+      newExpenseNameController.text,
+      DateTime.now(),
+    );
 
     Navigator.pop(context);
     clear();
@@ -111,8 +104,7 @@ class _HomePageState extends State<HomePage> {
 // clear controllers
   void clear() {
     newExpenseNameController.clear();
-    newExpenseCentsController.clear();
-    newExpenseDollarController.clear();
+    newExpenseAmountController.clear();
   }
 
   // sign user out method
@@ -123,74 +115,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
-      builder: (context, value, child) => Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.grey[400],
-          centerTitle: true,
-          title: Text(
-            "Logged in as: " + user.email!,
-            style: const TextStyle(fontSize: 20),
-          ),
-          actions: [
-            IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
-          ],
-        ),
-        backgroundColor: Colors.grey[700],
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color.fromARGB(255, 228, 216, 196),
-          onPressed: addNewExpense,
-          child: Icon(Icons.add),
-        ),
-        body:
+        builder: (context, value, child) => Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.grey[400],
+                centerTitle: true,
+                title: Text(
+                  "Logged in as: " + user.email!,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                actions: [
+                  IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
+                ],
+              ),
+              backgroundColor: Colors.grey[700],
+              floatingActionButton: FloatingActionButton(
+                backgroundColor: const Color.fromARGB(255, 228, 216, 196),
+                onPressed: addNewExpense,
+                child: Icon(Icons.add),
+              ),
+              body:
 
-            // décommenter à la fin
-            // Center(
-            //   child: Text(
-            //     "Logged in as: " + user.email!,
-            //     style: const TextStyle(fontSize: 20),
-            //   ),
-            // ),
+                  // décommenter à la fin
+                  // Center(
+                  //   child: Text(
+                  //     "Logged in as: " + user.email!,
+                  //     style: const TextStyle(fontSize: 20),
+                  //   ),
+                  // ),
 
-            ListView(
-          children: [
-            const SizedBox(
-              height: 30,
-            ),
+                  ListView(
+                children: [
+                  const SizedBox(
+                    height: 30,
+                  ),
 // weekly summary
-            ExpenseSummary(startOfWeek: value.startOfWeekDate()),
+                  ExpenseSummary(startOfWeek: value.startOfWeekDate()),
 
-            const SizedBox(
-              height: 20,
-            ),
+                  const SizedBox(
+                    height: 20,
+                  ),
 
 //expense list
-
-            // ListView.builder(
-            //     shrinkWrap: true,
-            //     physics: const NeverScrollableScrollPhysics(),
-            //     itemCount: value.getAllExpenseList().length,
-            //     itemBuilder: (context, index) => ExpenseTile(
-            //         name: value.getAllExpenseList()[index].name,
-            //         amount: value.getAllExpenseList()[index].amount,
-            //         dateTime: value.getAllExpenseList()[index].dateTime)),
-
-            // expense list
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: value.overalExpenseList.length,
-              itemBuilder: (context, index) {
-                var expense = value.overalExpenseList[index];
-                return ExpenseTile(
-                  name: expense.name,
-                  amount: expense.amount,
-                  dateTime: expense.dateTime,
-                );
-              },
-            ),
-          ],
+                ],
+              ),
+               
         ),
-      ),
-    );
+            );
   }
 }

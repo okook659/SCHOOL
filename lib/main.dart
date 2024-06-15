@@ -1,4 +1,3 @@
-import 'package:expenses_tracker/app_view.dart';
 import 'package:expenses_tracker/data/expense_data.dart';
 import 'package:expenses_tracker/pages/auth_page.dart';
 import 'package:expenses_tracker/pages/home_page.dart';
@@ -17,7 +16,14 @@ void main() async {
           storageBucket: "expenses-tracker-f104f.appspot.com",
           messagingSenderId: "113213160525",
           appId: "1:113213160525:web:b7e0048479d08f5af67004"));
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ExpenseData()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -25,12 +31,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(create: (context) => ExpenseData(),
-    builder: (context, child) => MaterialApp(
-      debugShowCheckedModeBanner: false,
-      //change this later
-     home: AuthPage(),
-    //  home: HomePage(),
-    ));
+    return ChangeNotifierProvider(
+        create: (context) => ExpenseData(),
+        builder: (context, child) => MaterialApp(
+              debugShowCheckedModeBanner: false,
+              //change this later
+              home: AuthPage(),
+              //  home: HomePage(),
+            ));
   }
 }

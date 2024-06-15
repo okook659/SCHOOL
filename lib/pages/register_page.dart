@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/components/my_button.dart';
 import 'package:expenses_tracker/components/my_textfield.dart';
 import 'package:expenses_tracker/components/square_tile.dart';
@@ -14,15 +15,13 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-// text editing controllers
+  // text editing controllers
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
-
   final confirmPasswordController = TextEditingController();
 
   // sign user UP method
-  void signUserUp() async {
+  Future<void> signUserUp() async {
     // show loading circle
     showDialog(
         context: context,
@@ -32,36 +31,54 @@ class _RegisterPageState extends State<RegisterPage> {
           );
         });
 
-    //try creating the user
-
     try {
       if (passwordController.text == confirmPasswordController.text) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: emailController.text, password: passwordController.text);
+        // Create user with Firebase Authentication
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+                email: emailController.text, password: passwordController.text);
+
+        // Get the UID of the newly created user
+        String uid = userCredential.user!.uid;
+
+        // Add user information to Firestore
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'email': emailController.text,
+          'password': passwordController
+              .text, // Note: Storing passwords in plaintext is insecure. Consider hashing the password.
+        });
+
+        // Pop the loading circle
+        Navigator.pop(context);
       } else {
-        // show error message
+        // Show error message
         showErrorMessage("Passwords don't match");
+        Navigator.pop(context);
       }
-
-      // pop the loading circle
-      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
-      // pop the loading circle
+      // Pop the loading circle
       Navigator.pop(context);
 
-      //wrong email
-      if (e.code == 'user-not-found') {
-        showErrorMessage("Username not found");
+      // Handle different auth errors
+      if (e.code == 'email-already-in-use') {
+        showErrorMessage("The email address is already in use.");
+      } else if (e.code == 'invalid-email') {
+        showErrorMessage("The email address is not valid.");
+      } else if (e.code == 'operation-not-allowed') {
+        showErrorMessage("Email/password accounts are not enabled.");
+      } else if (e.code == 'weak-password') {
+        showErrorMessage("The password is too weak.");
+      } else {
+        showErrorMessage(e.message ?? "An unknown error occurred.");
       }
-
-      //wrong error
-      else if (e.code == 'wrong-password') {
-        showErrorMessage("Password incorrect");
-      }
+    } catch (e) {
+      // Pop the loading circle and show any other errors
+      Navigator.pop(context);
+      showErrorMessage(e.toString());
     }
   }
 
-// wrong email message popup
+  // wrong email message popup
   void showErrorMessage(String message) {
     showDialog(
       context: context,
@@ -72,17 +89,6 @@ class _RegisterPageState extends State<RegisterPage> {
             message,
             style: const TextStyle(color: Colors.white),
           ),
-        );
-      },
-    );
-  }
-
-  void wrongPasswordMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const AlertDialog(
-          title: Text('Incorrect Password'),
         );
       },
     );
@@ -106,7 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 50),
                 //welcome
-                Text('Let\' s create an account for you!',
+                Text('Let\'s create an account for you!',
                     style: TextStyle(
                       color: Colors.grey[700],
                       fontSize: 16,

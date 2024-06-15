@@ -1,66 +1,71 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/datetime/date_time_helper.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ExpenseData extends ChangeNotifier {
   // list of all expenses
   List<ExpenseItem> overalExpenseList = [];
+  List<ExpenseItem> _expenses = [];
 
+  List<ExpenseItem> get expenses => _expenses;
 
-  // // get expense list
-  // List<ExpenseItem> getAllExpenseList() {
-  //   return overalExpenseList;
-  // }
+  Future<void> getExpenses() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+    String uid = user.uid;
 
-  Future<void> getAllExpenseList() async {
+    CollectionReference userExpenses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('expenses');
+
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('expenses').get();
-      overalExpenseList = querySnapshot.docs.map((doc) {
+      QuerySnapshot querySnapshot = await userExpenses.get();
+
+      _expenses = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return ExpenseItem(
-          // id: doc.id,  // Vous n'avez pas besoin d'ID ici
-          name: doc['name'],
-          amount: doc['amount'],
-          dateTime: (doc['dateTime'] as Timestamp).toDate(),
+          expenseId: doc.id,
+          amount: data['amount'],
+          name: data['name'],
+          dateTime: DateTime.parse(data['dateTime']),
         );
       }).toList();
+
       notifyListeners();
-    } catch (e) {
-      print("Failed to get expenses: $e");
+      print("Expenses Fetched");
+    } catch (error) {
+      print("Failed to fetch expenses: $error");
     }
   }
 
-
-  // add a new expense
-  void addNewExpense(ExpenseItem newExpense) {
-    overalExpenseList.add(newExpense);
-
-    addExpense(newExpense.amount, newExpense.name, newExpense.dateTime);
-    notifyListeners();
-  }
-
-//   Future<void> addNewExpense(String userId, String amount, String name, DateTime dateTime) async {
-//   CollectionReference expenses = FirebaseFirestore.instance.collection('users').doc(userId).collection('expenses');
-
-//   return expenses.add({
-//     'name': name,
-//     'amount': amount,
-//     'dateTime': dateTime.toString,
-//   })
-//   .then((value) => print("Expense Added"))
-//   .catchError((error) => print("Failed to add expense: $error"));
-// }
-
   Future<void> addExpense(String amount, String name, DateTime dateTime) async {
-    CollectionReference expenses =
-        FirebaseFirestore.instance.collection('expenses');
+    // Obtenir l'UID de l'utilisateur connecté
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+    String uid = user.uid;
 
-    return expenses
+    // Référence à la collection des dépenses de l'utilisateur
+    CollectionReference userExpenses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('expenses');
+
+    return userExpenses
         .add({
           'amount': amount,
           'name': name,
-          'dateTime': dateTime.toString(),
+          'dateTime': dateTime
+              .toIso8601String(), // Utiliser toIso8601String pour un format de date standardisé
         })
         .then((value) => print("Expense Added"))
         .catchError((error) => print("Failed to add expense: $error"));
@@ -74,24 +79,32 @@ class ExpenseData extends ChangeNotifier {
   // }
 
   Future<void> deleteAnExpense(String name) async {
-    CollectionReference expenses =
-        FirebaseFirestore.instance.collection('expenses');
-
-    QuerySnapshot querySnapshot =
-        await expenses.where('name', isEqualTo: name).get();
-
-    for (var doc in querySnapshot.docs) {
-      await doc.reference.delete();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
     }
+    String uid = user.uid;
 
-    for (var expense in overalExpenseList) {
-      if (expense.name == name) {
-        overalExpenseList.remove(expense);
-        notifyListeners();
-        break;
+    CollectionReference userExpenses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('expenses');
+
+    try {
+      QuerySnapshot querySnapshot =
+          await userExpenses.where('name', isEqualTo: name).get();
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
       }
-    }
 
+      _expenses.removeWhere((expense) => expense.name == name);
+      notifyListeners();
+      print("Expense Deleted");
+    } catch (error) {
+      print("Failed to delete expense: $error");
+    }
     notifyListeners();
   }
 
@@ -143,7 +156,8 @@ class ExpenseData extends ChangeNotifier {
       // date
     };
 
-    for (var expense in overalExpenseList) {
+//j'avais mis overalExpenses
+    for (var expense in _expenses) {
       String date = convertDateTimeToString(expense.dateTime);
       double amount = double.parse(expense.amount);
 
