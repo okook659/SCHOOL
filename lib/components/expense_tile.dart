@@ -18,16 +18,27 @@ class ExpenseTile extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          tileColor: Colors.white,
-          title: Text(name),
-          subtitle: Text(dateTime.day.toString() +
-              ' / ' +
-              dateTime.month.toString() +
-              ' / ' +
-              dateTime.year.toString()),
-          trailing: Text(amount + 'XOF'),
+          tileColor: Colors.black.withOpacity(0.8),
+          title: Text(
+            name,
+            style: TextStyle(color: Colors.white),
+          ),
+          subtitle: Text(
+            dateTime.day.toString() +
+                ' / ' +
+                dateTime.month.toString() +
+                ' / ' +
+                dateTime.year.toString(),
+            style: TextStyle(color: Colors.white),
+          ),
+          trailing: Text(
+            amount + 'XOF',
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
           leading: IconButton(
-            color: Colors.black,
+            color: Colors.white,
             icon: Icon(Icons.delete),
             onPressed: () {
               Provider.of<ExpenseData>(context, listen: false)

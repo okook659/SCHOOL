@@ -66,13 +66,13 @@ class MyBarGraph extends StatelessWidget {
             .map((data) => BarChartGroupData(x: data.x, barRods: [
                   BarChartRodData(
                     toY: data.y,
-                    color: Color(0xFFE66F5C),
+                    color: Color(0xFF6E3C19),
                     width: 20,
                     borderRadius: BorderRadius.circular(5),
                     backDrawRodData: BackgroundBarChartRodData(
                       show: true,
                       toY: maxY,
-                      color: Colors.white,
+                      color: Colors.grey,
                     ),
                   ),
                 ]))

@@ -45,7 +45,8 @@ class _RegisterPageState extends State<RegisterPage> {
         await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'email': emailController.text,
           'password': passwordController
-              .text, // Note: Storing passwords in plaintext is insecure. Consider hashing the password.
+              .text,
+              'money': 0 // Note: Storing passwords in plaintext is insecure. Consider hashing the password.
         });
 
         // Pop the loading circle

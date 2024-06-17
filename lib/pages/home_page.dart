@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/components/expense_chart.dart';
 import 'package:expenses_tracker/components/expense_summary.dart';
 import 'package:expenses_tracker/components/expense_tile.dart';
+import 'package:expenses_tracker/components/my_button.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,8 @@ class _HomePageState extends State<HomePage> {
 // text controllers
   final newExpenseNameController = TextEditingController();
   final newExpenseAmountController = TextEditingController();
+  final moneyAddController = TextEditingController();
+  final moneySubController = TextEditingController();
 
   void addNewExpense() {
     showDialog(
@@ -86,15 +89,51 @@ class _HomePageState extends State<HomePage> {
         dateTime: DateTime.now());
 
     //add the new expense
-    Provider.of<ExpenseData>(context, listen: false).addExpense(
-      amount,
-      newExpenseNameController.text,
-      DateTime.now(),
-    );
+    if (context != null) {
+      Provider.of<ExpenseData>(context, listen: false).addExpense(
+        amount,
+        newExpenseNameController.text,
+        DateTime.now(),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Money added successfully')),
+      );
+    }
 
     Provider.of<ExpenseData>(context, listen: false).addNewExpense(newExpense);
     Navigator.pop(context);
     clear();
+  }
+
+  double displayMoney() {
+    if (context != null) {
+      double Total = Provider.of<ExpenseData>(context, listen: false)
+              .getMoneyOfUSer()
+          as double; // use null-coalescing operator to default to 0.0 if null
+      return Total;
+    } else {
+      return 0.0;
+    }
+  }
+
+  void add() async {
+    double money = double.parse(moneyAddController.text);
+    if (context != null) {
+      Provider.of<ExpenseData>(context, listen: false)
+          .setMoneyOfUser(money, true);
+      Navigator.pop(context);
+      clear();
+    }
+  }
+
+  void substract() async {
+    double money = double.parse(moneySubController.text);
+    if (context != null) {
+      Provider.of<ExpenseData>(context, listen: false)
+          .setMoneyOfUser(money, false);
+      Navigator.pop(context);
+      clear();
+    }
   }
 
 // cancel
@@ -103,10 +142,83 @@ class _HomePageState extends State<HomePage> {
     clear();
   }
 
+// amount
+  void addMoney() {
+    //create this expense item
+
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Add money'),
+              content:
+
+                  //francs
+                  Expanded(
+                child: TextField(
+                  controller: moneyAddController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: "Francs CFA",
+                  ),
+                ),
+              ),
+              actions: [
+                // save button
+                MaterialButton(
+                  onPressed: add,
+                  child: Text('Done'),
+                ),
+
+                //cancel button
+                MaterialButton(
+                  onPressed: cancel,
+                  child: Text('Cancel'),
+                )
+              ],
+            ));
+  }
+
+  void substractMoney() {
+    //create this expense item
+
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Substract money'),
+              content:
+
+                  //francs
+                  Expanded(
+                child: TextField(
+                  controller: moneySubController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: "Francs CFA",
+                  ),
+                ),
+              ),
+              actions: [
+                // save button
+                MaterialButton(
+                  onPressed: substract,
+                  child: Text('Done'),
+                ),
+
+                //cancel button
+                MaterialButton(
+                  onPressed: cancel,
+                  child: Text('Cancel'),
+                )
+              ],
+            ));
+  }
+
 // clear controllers
   void clear() {
     newExpenseNameController.clear();
     newExpenseAmountController.clear();
+    moneyAddController.clear();
+    moneySubController.clear();
   }
 
   // sign user out method
@@ -118,24 +230,26 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
         builder: (context, value, child) => Scaffold(
-              // appBar: AppBar(
-              //   backgroundColor: Colors.grey[500],
-              //   centerTitle: true,
-              //   title: Text(
-              //     "Logged in as: " + user.email!,
-              //     style: const TextStyle(fontSize: 20),
-              //   ),
-              //   actions: [
-              //     IconButton(
-              //         onPressed: signUserOut,
-              //         color: Colors.white,
-              //         hoverColor: Colors.blueAccent,
-              //         icon: Icon(Icons.logout))
-              //   ],
-              // ),
-              backgroundColor: Color(0xFFE5DACE),
+              appBar: AppBar(
+                backgroundColor: Color(0xFF6E3C19),
+                centerTitle: true,
+                title: Text(
+                  "Logged in as: " + user.email!,
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
+                ),
+                actions: [
+                  IconButton(
+                      onPressed: signUserOut,
+                      color: Colors.white,
+                      hoverColor: Colors.blueAccent,
+                      icon: Icon(Icons.logout))
+                ],
+              ),
+              //backgroundColor: Color(0xFF9E9190),
+              backgroundColor: Colors.grey.withOpacity(0.2),
+
               floatingActionButton: FloatingActionButton(
-                backgroundColor: Color(0xFFCB6330),
+                backgroundColor: Color(0xFF34170D),
                 foregroundColor: Colors.white,
                 onPressed: addNewExpense,
                 child: Icon(Icons.add),
@@ -148,26 +262,47 @@ class _HomePageState extends State<HomePage> {
                   Center(
                     child: Column(
                       children: [
+                        SizedBox(
+                          height: 30,
+                        ),
                         Container(
                           decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
-                              color: Color(0xFFD69369),
+                              color: Color(0xFF6E3C19),
                               borderRadius: BorderRadius.circular(20)),
-                          height: 200,
+                          height: 100,
                           //width: 400,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Text(
-                                "Logged in as: " + user.email!,
-                                style: const TextStyle(
-                                    fontSize: 20, color: Colors.white),
+                              FutureBuilder<double?>(
+                                future: Provider.of<ExpenseData>(context,
+                                        listen: false)
+                                    .getMoneyOfUSer(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return Text(
+                                      "Your Money:  ${snapshot.data} XOF",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 18),
+                                    );
+                                  } else {
+                                    return Text("Loading...");
+                                  }
+                                },
                               ),
                               IconButton(
-                                onPressed: signUserOut,
-                                icon: Icon(Icons.logout_rounded),
+                                onPressed: addMoney,
+                                icon: Icon(Icons.swipe_up),
                                 color: Colors.white,
+                                iconSize: 30,
                               ),
+                              IconButton(
+                                onPressed: substractMoney,
+                                icon: Icon(Icons.swipe_down),
+                                color: Colors.white,
+                                iconSize: 30,
+                              )
                             ],
                           ),
                         ),

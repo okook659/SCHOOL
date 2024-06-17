@@ -7,10 +7,36 @@ import 'package:provider/provider.dart';
 
 class ExpenseData extends ChangeNotifier {
   // list of all expenses
+
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
   List<ExpenseItem> overalExpenseList = [];
   List<ExpenseItem> _expenses = [];
 
   List<ExpenseItem> get expenses => _expenses;
+
+  late double money = 0;
+
+  Future<double?> getMoneyOfUSer() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    double? money = 0;
+    if (user == null) {
+      return money;
+    } else {
+      String uid = user.uid;
+      DocumentReference userMoney =
+          FirebaseFirestore.instance.collection('users').doc(uid);
+      try {
+        DocumentSnapshot<Object?> documentSnapshot = await userMoney.get();
+        money = documentSnapshot.get('money');
+        print("");
+        return money! - calculateTotalExpenses();
+      } catch (e) {
+        print(e);
+      }
+    }
+  }
 
   Future<void> getExpenses() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -18,6 +44,7 @@ class ExpenseData extends ChangeNotifier {
       print("No user is signed in");
       return;
     }
+
     String uid = user.uid;
 
     CollectionReference userExpenses = FirebaseFirestore.instance
@@ -39,7 +66,7 @@ class ExpenseData extends ChangeNotifier {
       }).toList();
 
       notifyListeners();
-      print("Expenses Fetched");
+      print("");
     } catch (error) {
       print("Failed to fetch expenses: $error");
     }
@@ -58,6 +85,15 @@ class ExpenseData extends ChangeNotifier {
     notifyListeners();
   }
 
+// récupérer l'ensemble des dépenses de l'user
+  double calculateTotalExpenses() {
+    double total = 0;
+    for (var expense in _expenses) {
+      total += double.parse(expense.amount);
+    }
+    return total;
+  }
+
   Future<void> addExpense(String amount, String name, DateTime dateTime) async {
     // Obtenir l'UID de l'utilisateur connecté
     User? user = FirebaseAuth.instance.currentUser;
@@ -68,27 +104,67 @@ class ExpenseData extends ChangeNotifier {
 
     String uid = user.uid;
 
-    // Référence à la collection des dépenses de l'utilisateur
-    CollectionReference userExpenses = FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .collection('expenses');
+//Récupérer l'argent de l'utilisateur
+    double userMoney = await getMoneyOfUSer() ?? 0.0;
 
-    return userExpenses
-        .add({
+    if (userMoney < double.parse(amount)) {
+      print("Vous n'avez pas suffisamment d'argent pour faire cette dépense.");
+
+      return;
+    } else {
+      setMoneyOfUser(double.parse(amount), false);
+
+      // Référence à la collection des dépenses de l'utilisateur
+      CollectionReference userExpenses = FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('expenses');
+
+      try {
+        userExpenses.add({
           'amount': amount,
           'name': name,
-          'dateTime': dateTime
-              .toIso8601String(), // Utiliser toIso8601String pour un format de date standardisé
-        })
-        .then((value) => print("Expense Added"))
-        .catchError((error) => print("Failed to add expense: $error"));
+          'dateTime': dateTime.toIso8601String(),
+          // Utiliser toIso8601String pour un format de date standardisé
+        });
+        SnackBar(
+          content: Text("Dépense ajoutée"),
+        );
+      } catch (error) {
+        SnackBar(
+            content: Text('Erreur lors de l\'ajout de la dépense : $error'));
+      }
+    }
+  }
+
+  //set money method
+  Future<void> setMoneyOfUser(double money, bool add) async {
+    // Obtenir l'UID de l'utilisateur connecté
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+
+    String uid = user.uid;
+    if (add) {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'money': FieldValue.increment(money)});
+    } else {
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'money': FieldValue.increment(-money)});
+    }
   }
 
   // delete a new expense
   void deleteExpense(ExpenseItem expense) {
     overalExpenseList.remove(expense);
     deleteAnExpense(expense.name);
+    setMoneyOfUser(double.tryParse(expense.amount) ?? 0.0, true);
     getAllExpenseList();
     notifyListeners();
   }
