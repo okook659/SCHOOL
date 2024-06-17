@@ -1,70 +1,111 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/datetime/date_time_helper.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ExpenseData extends ChangeNotifier {
   // list of all expenses
   List<ExpenseItem> overalExpenseList = [];
+  List<ExpenseItem> _expenses = [];
 
-  // get expense list
-  List<ExpenseItem> getAllExpenseList() {
-    return overalExpenseList;
+  List<ExpenseItem> get expenses => _expenses;
+
+  Future<void> getExpenses() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+    String uid = user.uid;
+
+    CollectionReference userExpenses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('expenses');
+
+    try {
+      QuerySnapshot querySnapshot = await userExpenses.get();
+
+      _expenses = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return ExpenseItem(
+          expenseId: doc.id,
+          amount: data['amount'],
+          name: data['name'],
+          dateTime: DateTime.parse(data['dateTime']),
+        );
+      }).toList();
+
+      notifyListeners();
+      print("Expenses Fetched");
+    } catch (error) {
+      print("Failed to fetch expenses: $error");
+    }
   }
-
-  // add a new expense
-  void addNewExpense(ExpenseItem newExpense) {
-    overalExpenseList.add(newExpense);
-    addExpense(newExpense.amount, newExpense.name, newExpense.dateTime);
-
-    notifyListeners();
-  }
-
-//   Future<void> addNewExpense(String userId, String amount, String name, DateTime dateTime) async {
-//   CollectionReference expenses = FirebaseFirestore.instance.collection('users').doc(userId).collection('expenses');
-
-//   return expenses.add({
-//     'name': name,
-//     'amount': amount,
-//     'dateTime': dateTime.toString,
-//   })
-//   .then((value) => print("Expense Added"))
-//   .catchError((error) => print("Failed to add expense: $error"));
-// }
 
   Future<void> addExpense(String amount, String name, DateTime dateTime) async {
-    CollectionReference expenses =
-        FirebaseFirestore.instance.collection('expenses');
+    // Obtenir l'UID de l'utilisateur connecté
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+    String uid = user.uid;
 
-    return expenses
+    // Référence à la collection des dépenses de l'utilisateur
+    CollectionReference userExpenses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('expenses');
+
+    return userExpenses
         .add({
           'amount': amount,
           'name': name,
-          'dateTime': dateTime.toString(),
+          'dateTime': dateTime
+              .toIso8601String(), // Utiliser toIso8601String pour un format de date standardisé
         })
         .then((value) => print("Expense Added"))
         .catchError((error) => print("Failed to add expense: $error"));
   }
 
   // delete a new expense
-  void deleteAnExpense(ExpenseItem expense) {
-    overalExpenseList.remove(expense);
+  // void deleteExpense(ExpenseItem expense) {
+  //   overalExpenseList.remove(expense);
+  //   deleteAnExpense(expense);
+  //   notifyListeners();
+  // }
 
+  Future<void> deleteAnExpense(String name) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("No user is signed in");
+      return;
+    }
+    String uid = user.uid;
+
+    CollectionReference userExpenses = FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('expenses');
+
+    try {
+      QuerySnapshot querySnapshot =
+          await userExpenses.where('name', isEqualTo: name).get();
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      _expenses.removeWhere((expense) => expense.name == name);
+      notifyListeners();
+      print("Expense Deleted");
+    } catch (error) {
+      print("Failed to delete expense: $error");
+    }
     notifyListeners();
-  }
-
-  // delete expense
-  Future<void> deleteExpense(String documentId) async {
-    CollectionReference expenses =
-        FirebaseFirestore.instance.collection('expenses');
-    
-
-    return expenses
-        .doc(documentId)
-        .delete()
-        .then((value) => print("Expense Deleted"))
-        .catchError((error) => print("Failed to delete expense: $error"));
   }
 
   // get weekday from a dateTime object
@@ -115,7 +156,8 @@ class ExpenseData extends ChangeNotifier {
       // date
     };
 
-    for (var expense in overalExpenseList) {
+//j'avais mis overalExpenses
+    for (var expense in _expenses) {
       String date = convertDateTimeToString(expense.dateTime);
       double amount = double.parse(expense.amount);
 

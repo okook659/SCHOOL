@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expenses_tracker/components/expense_chart.dart';
 import 'package:expenses_tracker/components/expense_summary.dart';
 import 'package:expenses_tracker/components/expense_tile.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
@@ -13,7 +14,6 @@ class HomePage extends StatefulWidget {
 
   @override
   State<HomePage> createState() => _HomePageState();
-  
 }
 
 class _HomePageState extends State<HomePage> {
@@ -77,12 +77,13 @@ class _HomePageState extends State<HomePage> {
 // put dollar and cents together
     String amount = newExpenseAmountController.text;
 
-    // create this expense item
-    // ExpenseItem newExpense = ExpenseItem(
-    //     // userId: user.uid,
-    //     name: newExpenseNameController.text,
-    //     amount: amount,
-    //     dateTime: DateTime.now());
+    //create this expense item
+    String userId = user.uid;
+    ExpenseItem newExpense = ExpenseItem(
+        expenseId: userId,
+        name: newExpenseNameController.text,
+        amount: amount,
+        dateTime: DateTime.now());
 
     //add the new expense
     Provider.of<ExpenseData>(context, listen: false).addExpense(
@@ -91,6 +92,7 @@ class _HomePageState extends State<HomePage> {
       DateTime.now(),
     );
 
+    Provider.of<ExpenseData>(context, listen: false).addNewExpense(newExpense);
     Navigator.pop(context);
     clear();
   }
@@ -116,50 +118,84 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
         builder: (context, value, child) => Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.grey[400],
-                centerTitle: true,
-                title: Text(
-                  "Logged in as: " + user.email!,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                actions: [
-                  IconButton(onPressed: signUserOut, icon: Icon(Icons.logout))
-                ],
-              ),
-              backgroundColor: Colors.grey[700],
+              // appBar: AppBar(
+              //   backgroundColor: Colors.grey[500],
+              //   centerTitle: true,
+              //   title: Text(
+              //     "Logged in as: " + user.email!,
+              //     style: const TextStyle(fontSize: 20),
+              //   ),
+              //   actions: [
+              //     IconButton(
+              //         onPressed: signUserOut,
+              //         color: Colors.white,
+              //         hoverColor: Colors.blueAccent,
+              //         icon: Icon(Icons.logout))
+              //   ],
+              // ),
+              backgroundColor: Color(0xFFE5DACE),
               floatingActionButton: FloatingActionButton(
-                backgroundColor: const Color.fromARGB(255, 228, 216, 196),
+                backgroundColor: Color(0xFFCB6330),
+                foregroundColor: Colors.white,
                 onPressed: addNewExpense,
                 child: Icon(Icons.add),
               ),
               body:
-
-                  // décommenter à la fin
-                  // Center(
-                  //   child: Text(
-                  //     "Logged in as: " + user.email!,
-                  //     style: const TextStyle(fontSize: 20),
-                  //   ),
-                  // ),
+                  //weekly summarry
 
                   ListView(
                 children: [
-                  const SizedBox(
+                  Center(
+                    child: Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.rectangle,
+                              color: Color(0xFFD69369),
+                              borderRadius: BorderRadius.circular(20)),
+                          height: 200,
+                          //width: 400,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text(
+                                "Logged in as: " + user.email!,
+                                style: const TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                              IconButton(
+                                onPressed: signUserOut,
+                                icon: Icon(Icons.logout_rounded),
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
                     height: 30,
                   ),
-// weekly summary
-                  ExpenseSummary(startOfWeek: value.startOfWeekDate()),
-
-                  const SizedBox(
+                  ExpenseSummary(
+                    startOfWeek: value.startOfWeekDate(),
+                  ),
+                  SizedBox(
                     height: 20,
                   ),
 
-//expense list
+// expense list
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: value.getAllExpenseList().length,
+                    itemBuilder: (context, index) => ExpenseTile(
+                        name: value.getAllExpenseList()[index].name,
+                        amount: value.getAllExpenseList()[index].amount,
+                        dateTime: value.getAllExpenseList()[index].dateTime),
+                  ),
                 ],
               ),
-               
-        ),
-            );
+            ));
   }
 }

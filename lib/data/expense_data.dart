@@ -45,6 +45,19 @@ class ExpenseData extends ChangeNotifier {
     }
   }
 
+  List<ExpenseItem> getAllExpenseList() {
+    getExpenses();
+    overalExpenseList = _expenses;
+    return overalExpenseList;
+  }
+
+  void addNewExpense(ExpenseItem newExpense) {
+    overalExpenseList.add(newExpense);
+
+    getAllExpenseList();
+    notifyListeners();
+  }
+
   Future<void> addExpense(String amount, String name, DateTime dateTime) async {
     // Obtenir l'UID de l'utilisateur connecté
     User? user = FirebaseAuth.instance.currentUser;
@@ -52,6 +65,7 @@ class ExpenseData extends ChangeNotifier {
       print("No user is signed in");
       return;
     }
+
     String uid = user.uid;
 
     // Référence à la collection des dépenses de l'utilisateur
@@ -72,11 +86,12 @@ class ExpenseData extends ChangeNotifier {
   }
 
   // delete a new expense
-  // void deleteExpense(ExpenseItem expense) {
-  //   overalExpenseList.remove(expense);
-  //   deleteAnExpense(expense);
-  //   notifyListeners();
-  // }
+  void deleteExpense(ExpenseItem expense) {
+    overalExpenseList.remove(expense);
+    deleteAnExpense(expense.name);
+    getAllExpenseList();
+    notifyListeners();
+  }
 
   Future<void> deleteAnExpense(String name) async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -95,8 +110,11 @@ class ExpenseData extends ChangeNotifier {
       QuerySnapshot querySnapshot =
           await userExpenses.where('name', isEqualTo: name).get();
 
+      // ExpenseItem expenseItem = ExpenseItem(expenseId: q, name: name, amount: amount, dateTime: dateTime)
+
       for (var doc in querySnapshot.docs) {
         await doc.reference.delete();
+        overalExpenseList.remove(doc);
       }
 
       _expenses.removeWhere((expense) => expense.name == name);

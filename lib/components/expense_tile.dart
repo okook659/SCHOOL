@@ -15,22 +15,30 @@ class ExpenseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      tileColor: const Color.fromARGB(255, 228, 216, 196),
-      title: Text(name),
-      subtitle: Text(dateTime.day.toString() +
-          ' / ' +
-          dateTime.month.toString() +
-          ' / ' +
-          dateTime.year.toString()),
-      leading: Text('\$' + amount),
-      trailing: IconButton(
-        icon: Icon(Icons.delete),
-        onPressed: () {
-          Provider.of<ExpenseData>(context, listen: false)
-              .deleteAnExpense(name);
-        },
-      ),
+    return Column(
+      children: [
+        ListTile(
+          tileColor: Colors.white,
+          title: Text(name),
+          subtitle: Text(dateTime.day.toString() +
+              ' / ' +
+              dateTime.month.toString() +
+              ' / ' +
+              dateTime.year.toString()),
+          trailing: Text(amount + 'XOF'),
+          leading: IconButton(
+            color: Colors.black,
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              Provider.of<ExpenseData>(context, listen: false)
+                  .deleteAnExpense(name);
+            },
+          ),
+        ),
+        SizedBox(
+          height: 23,
+        ),
+      ],
     );
   }
 }
