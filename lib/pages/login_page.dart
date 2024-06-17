@@ -100,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                 //welcome
                 Text('Welcome back  you\'ve been missed!',
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: Color(0xFFD69369),
                       fontSize: 16,
                     )),
 
