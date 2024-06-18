@@ -90,13 +90,14 @@ class ExpenseSummary extends StatelessWidget {
       builder: (context, value, child) => Column(
         children: [
           //week total
-          const Padding(
+          Padding(
             padding: const EdgeInsets.all(25.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Week Total: '),
-                //Text(
-                //   '${calculateWeekTotal(value, sunday, monday, tuesday, wednesday, thursday, friday, saturday)} XOF'),
+                const Text('Week Total Expenses: '),
+                Text(
+                    '${calculateWeekTotal(value, sunday, monday, tuesday, wednesday, thursday, friday, saturday)} XOF'),
               ],
             ),
           ),
