@@ -1,7 +1,5 @@
 import 'package:expenses_tracker/data/expense_data.dart';
 import 'package:expenses_tracker/pages/auth_page.dart';
-import 'package:expenses_tracker/pages/home_page.dart';
-import 'package:expenses_tracker/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';

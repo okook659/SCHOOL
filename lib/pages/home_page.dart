@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/components/expense_chart.dart';
 import 'package:expenses_tracker/components/expense_summary.dart';
 import 'package:expenses_tracker/components/expense_tile.dart';
-import 'package:expenses_tracker/components/my_button.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -94,9 +93,6 @@ class _HomePageState extends State<HomePage> {
         amount,
         newExpenseNameController.text,
         DateTime.now(),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Money added successfully')),
       );
     }
 
@@ -231,7 +227,7 @@ class _HomePageState extends State<HomePage> {
     return Consumer<ExpenseData>(
         builder: (context, value, child) => Scaffold(
               appBar: AppBar(
-                backgroundColor: Color(0xFF6E3C19),
+                backgroundColor: Colors.blue,
                 centerTitle: true,
                 title: Text(
                   "Logged in as: " + user.email!,
@@ -241,15 +237,14 @@ class _HomePageState extends State<HomePage> {
                   IconButton(
                       onPressed: signUserOut,
                       color: Colors.white,
-                      hoverColor: Colors.blueAccent,
                       icon: Icon(Icons.logout))
                 ],
               ),
               //backgroundColor: Color(0xFF9E9190),
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.white24,
 
               floatingActionButton: FloatingActionButton(
-                backgroundColor: Color(0xFF34170D),
+                backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 onPressed: addNewExpense,
                 child: Icon(Icons.add),
@@ -268,7 +263,7 @@ class _HomePageState extends State<HomePage> {
                         Container(
                           decoration: BoxDecoration(
                               shape: BoxShape.rectangle,
-                              color: Color(0xFF6E3C19),
+                              color: Colors.orangeAccent.withOpacity(0.7),
                               borderRadius: BorderRadius.circular(20)),
                           height: 100,
                           //width: 400,

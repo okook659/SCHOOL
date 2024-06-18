@@ -47,7 +47,8 @@ flutter {
 buildscript{
     dependencies {
   // ...
-
+ 
+        classpath 'com.google.gms:google-services:4.3.10' // Mettez à jour vers la dernière version
   // Import the Firebase BoM
   implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
 

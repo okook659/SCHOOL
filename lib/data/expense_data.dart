@@ -3,7 +3,6 @@ import 'package:expenses_tracker/datetime/date_time_helper.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class ExpenseData extends ChangeNotifier {
   // list of all expenses
