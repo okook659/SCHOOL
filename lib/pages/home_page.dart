@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/components/expense_chart.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:expenses_tracker/components/expense_summary.dart';
 import 'package:expenses_tracker/components/expense_tile.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
@@ -294,10 +293,9 @@ class _HomePageState extends State<HomePage> {
                             if (snapshot.hasData) {
                               return Text(
                                 "Your Money:  ${snapshot.data} XOF",
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w300),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
                                 ),
                               );
                             } else {
