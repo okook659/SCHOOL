@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expenses_tracker/components/expense_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:expenses_tracker/components/expense_summary.dart';
 import 'package:expenses_tracker/components/expense_tile.dart';
 import 'package:expenses_tracker/models/expense_item.dart';
@@ -225,107 +226,134 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ExpenseData>(
-        builder: (context, value, child) => Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.blue,
-                centerTitle: true,
-                title: Text(
-                  "Logged in as: " + user.email!,
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
-                ),
-                actions: [
-                  IconButton(
-                      onPressed: signUserOut,
-                      color: Colors.white,
-                      icon: Icon(Icons.logout))
-                ],
+      builder: (context, value, child) => Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(30),
+            ),
+            child: AppBar(
+              backgroundColor: Color(0xFF5E60CE),
+              centerTitle: true,
+              title: Text(
+                "Logged in as: " + user.email!,
+                style: const TextStyle(
+                    fontSize: 18, color: Colors.white, fontFamily: 'Cambria'),
               ),
-              //backgroundColor: Color(0xFF9E9190),
-              backgroundColor: Colors.white24,
+              actions: [
+                IconButton(
+                    onPressed: signUserOut,
+                    color: Colors.white,
+                    icon: Icon(Icons.logout))
+              ],
+            ),
+          ),
+        ),
+        //backgroundColor: Color(0xFF9E9190),
+        backgroundColor: Color(0xFF010101),
 
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                onPressed: addNewExpense,
-                child: Icon(Icons.add),
-              ),
-              body:
-                  //weekly summarry
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xFF5E60CE),
+          foregroundColor: Colors.white,
+          onPressed: addNewExpense,
+          child: Icon(Icons.add),
+        ),
+        body:
+            //weekly summarry
 
-                  ListView(
+            ListView(
+          children: [
+            Center(
+              child: Column(
                 children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 30,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              color: Colors.orangeAccent.withOpacity(0.7),
-                              borderRadius: BorderRadius.circular(20)),
-                          height: 100,
-                          //width: 400,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              FutureBuilder<double?>(
-                                future: Provider.of<ExpenseData>(context,
-                                        listen: false)
-                                    .getMoneyOfUSer(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return Text(
-                                      "Your Money:  ${snapshot.data} XOF",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 18),
-                                    );
-                                  } else {
-                                    return Text("Loading...");
-                                  }
-                                },
-                              ),
-                              IconButton(
-                                onPressed: addMoney,
-                                icon: Icon(Icons.swipe_up),
-                                color: Colors.white,
-                                iconSize: 30,
-                              ),
-                              IconButton(
-                                onPressed: substractMoney,
-                                icon: Icon(Icons.swipe_down),
-                                color: Colors.white,
-                                iconSize: 30,
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   SizedBox(
                     height: 30,
                   ),
-                  ExpenseSummary(
-                    startOfWeek: value.startOfWeekDate(),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-
-// expense list
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: value.getAllExpenseList().length,
-                    itemBuilder: (context, index) => ExpenseTile(
-                        name: value.getAllExpenseList()[index].name,
-                        amount: value.getAllExpenseList()[index].amount,
-                        dateTime: value.getAllExpenseList()[index].dateTime),
+                  Container(
+                    width: 500,
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFA52CD4), Color(0xFFA06AD2)],
+                          begin: Alignment.centerRight,
+                          end: Alignment.centerLeft,
+                        ),
+                        shape: BoxShape.rectangle,
+                        color: Color(0xFF0CCDA3),
+                        borderRadius: BorderRadius.circular(20)),
+                    height: 100,
+                    //width: 400,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        FutureBuilder<double?>(
+                          future:
+                              Provider.of<ExpenseData>(context, listen: false)
+                                  .getMoneyOfUSer(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Text(
+                                "Your Money:  ${snapshot.data} XOF",
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w300),
+                                ),
+                              );
+                            } else {
+                              return Text("Loading...");
+                            }
+                          },
+                        ),
+                        IconButton(
+                          onPressed: addMoney,
+                          icon: Icon(Icons.swipe_up),
+                          color: Colors.white,
+                          iconSize: 30,
+                        ),
+                        IconButton(
+                          onPressed: substractMoney,
+                          icon: Icon(Icons.swipe_down),
+                          color: Colors.white,
+                          iconSize: 30,
+                        )
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ));
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            ExpenseSummary(
+              startOfWeek: value.startOfWeekDate(),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+
+            // expense list
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Container(
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                child: ListView.builder(
+                  clipBehavior: Clip.antiAlias,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: value.getAllExpenseList().length,
+                  itemBuilder: (context, index) => ExpenseTile(
+                      name: value.getAllExpenseList()[index].name,
+                      amount: value.getAllExpenseList()[index].amount,
+                      dateTime: value.getAllExpenseList()[index].dateTime),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

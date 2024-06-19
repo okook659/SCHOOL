@@ -111,8 +111,6 @@ class ExpenseData extends ChangeNotifier {
 
       return;
     } else {
-      setMoneyOfUser(double.parse(amount), false);
-
       // Référence à la collection des dépenses de l'utilisateur
       CollectionReference userExpenses = FirebaseFirestore.instance
           .collection('users')

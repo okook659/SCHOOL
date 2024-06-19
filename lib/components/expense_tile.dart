@@ -18,7 +18,7 @@ class ExpenseTile extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          tileColor: Colors.black.withOpacity(0.8),
+          tileColor: Color(0xFF2C2C2C),
           title: Text(
             name,
             style: TextStyle(color: Colors.white),
@@ -32,10 +32,12 @@ class ExpenseTile extends StatelessWidget {
             style: TextStyle(color: Colors.white),
           ),
           trailing: Text(
-            amount + 'XOF',
+            amount + ' XOF',
             style: TextStyle(
-              color: Colors.white,
-            ),
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: 'Times New Roman'),
           ),
           leading: IconButton(
             color: Colors.white,

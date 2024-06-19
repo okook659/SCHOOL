@@ -50,14 +50,20 @@ class ExpensesList extends StatelessWidget {
             itemCount: expenses.length,
             itemBuilder: (context, index) {
               final expense = expenses[index];
-              return ListTile(
-                title: Text(expense.name),
-                subtitle: Text(
-                    'Amount: ${expense.amount}, Date: ${expense.dateTime}'),
-                // Gérer la suppression de la dépense
-                trailing: IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {},
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text(expense.name),
+                  subtitle: Text(
+                    'Amount: ${expense.amount}, Date: ${expense.dateTime}',
+                  ),
+                  // Gérer la suppression de la dépense
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                    ),
+                    onPressed: () {},
+                  ),
                 ),
               );
             },
